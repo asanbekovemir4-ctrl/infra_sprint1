@@ -1,0 +1,70 @@
+# /etc/nginx/sites-enabled/default
+# Два проекта на одном сервере: Taski и Kittygram, каждый в своём блоке server.
+
+# ---------- Taski ----------
+server {
+    server_name <домен-taski>;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    location / {
+        root   /var/www/taski;
+        index  index.html index.htm;
+        try_files $uri /index.html;
+    }
+
+    # Строки ниже добавит certbot при выпуске SSL-сертификата.
+    # listen 443 ssl;
+    # ssl_certificate /etc/letsencrypt/live/<домен-taski>/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/<домен-taski>/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+# ---------- Kittygram ----------
+server {
+    server_name <IP-сервера> <домен-kittygram>;
+    server_tokens off;
+
+    location /api/ {
+        client_max_body_size 20M;
+        proxy_set_header Host $http_host;
+        proxy_pass http://127.0.0.1:8080;
+    }
+
+    location /admin/ {
+        client_max_body_size 20M;
+        proxy_set_header Host $http_host;
+        proxy_pass http://127.0.0.1:8080;
+    }
+
+    # Фото котиков: /media/cats/images/x.jpg -> /var/www/kittygram/media/cats/images/x.jpg
+    location /media/ {
+        alias /var/www/kittygram/media/;
+    }
+
+    # Статика админки Django (collectstatic -> /var/www/kittygram/static_backend/)
+    location /static_backend/ {
+        alias /var/www/kittygram/static_backend/;
+    }
+
+    # Собранный фронтенд (React SPA)
+    location / {
+        root   /var/www/kittygram;
+        index  index.html index.htm;
+        try_files $uri /index.html;
+    }
+
+    # Строки ниже добавит certbot при выпуске SSL-сертификата.
+    # listen 443 ssl;
+    # ssl_certificate /etc/letsencrypt/live/<домен-kittygram>/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/<домен-kittygram>/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
