@@ -7,6 +7,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 NGINX_PREFIX="$(brew --prefix)/etc/nginx"
 cd "$ROOT"
 
+# Если Kittygram уже запущен — сначала останавливаем, чтобы освободить порты.
+bash local/stop.sh > /dev/null 2>&1 || true
+sleep 1
+
 mkdir -p local/run local/www/media local/www/static_backend
 
 export SECRET_KEY="local-demo-secret-key"
