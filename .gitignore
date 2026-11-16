@@ -165,3 +165,5 @@ backend/.env
 backend/static_backend/
 backend/db.sqlite3
 venv/
+local/run/
+local/www/
